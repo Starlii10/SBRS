@@ -1,0 +1,19 @@
+[project]
+name = "SBRS"
+description = "Starlii's Battle Royale Simulator (Python rewrite)"
+readme = "README.md"
+license = { file = "LICENSE" }
+version = "0.1b1"
+authors = [
+    { name = "Starlii10", email = "starliithestarbot@gmail.com" }
+]
+
+dependencies = [
+    "colorama"
+]
+
+[project.urls]
+repository = "https://github.com/Starlii10/sbrs"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,28 @@
+{
+    "classic": true,
+    "use-teams": false,
+    "show-kills-only": false,
+    "attack-chance": 0.5,
+    "death-chances": {
+        "passive": 0.20,
+        "attack": 0.20
+    },
+    "load-file": true,
+    "files": {
+        "players": "players.txt",
+        "playertypes": "playertypes.txt"
+    },
+    "message-colors": {
+        "passive": "green",
+        "passive-death": "red",
+        "attack-success": "red",
+        "attack-fail": "magenta",
+        "passive-attack": "green",
+        "generic-player": "yellow",
+        "target-player": "green",
+        "new-turn": "green",
+        "end-turn": "yellow",
+        "winner": "green",
+        "most-kills": "green"
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "classic": false,
+    "use-teams": false,
+    "attack-chance": 0.1,
+    "death-chances": {
+        "passive": 0.1,
+        "attack": 0.1
+    },
+    "load-file": true,
+    "files": {
+        "players": "tests/players/players-stresstest.txt"
+    },
+    "message-colors": {
+        "passive": "green",
+        "passive-death": "red",
+        "attack-success": "red",
+        "attack-fail": "magenta",
+        "passive-attack": "green",
+        "generic-player": "yellow",
+        "target-player": "green",
+        "new-turn": "green",
+        "end-turn": "yellow",
+        "winner": "green",
+        "most-kills": "green"
+    }
+}

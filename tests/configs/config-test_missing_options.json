@@ -1,0 +1,8 @@
+{
+    "classic": true,
+    "use-teams": false,
+    "death-chances": {
+        "passive": 0.20,
+        "attack": 0.20
+    }
+}

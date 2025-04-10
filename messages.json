@@ -1,0 +1,98 @@
+{
+    "passive": {
+        "Default": [
+            "{player1} hears a familiar melody",
+            "{player1} thinks about home",
+            "{player1} wonders where everyone is",
+            "{player1} makes a plan",
+            "{player1} maps the nearby area",
+            "{player1} leaves for somewhere else",
+            "{player1} can't sleep",
+            "{player1} tries to sleep the day away",
+            "{player1} stretches",
+            "{player1}'s mind wanders off",
+            "{player1} soaks up the sun",
+            "{player1} spies on {player2}",
+            "{player1} comes across {player2}'s base",
+            "{player1} overhears {player2} talking to themselves",
+            "{player1} bumps into {player2} while wandering around",
+            "{player1} hears {player2} playing music",
+            "{player1} forms a truce with {player2} for the night",
+            "{player1} and {player2} go hunting together",
+            "{player1}, {player2}, and {player3} form a truce for the night",
+            "{player1} tries forcing {player2} to kill {player3}, but {player2} refuses",
+            "{player1} helps {player2} and {player3} hunt for food",
+            "{player1} builds a shelter with {player2} and {player3}",
+            "{player1} meets {player2} and {player3}",
+            "{player1} and {player2} become friends",
+            "{player1}, {player2}, and {player3} become friends",
+            "{player1}, {player2}, and {player3} fight off wolves together",
+            "{player1} hides from a bear",
+            "{player1} finds shelter in a cave",
+            "{player1} finds {player2}'s cave and joins them",
+            "{player1} finds an empty chest",
+            "{player1} eats some berries",
+            "{player1} drinks some river water",
+            "{player1} and {player2} share a meal",
+            "{player1}, {player2}, and {player3} have dinner together",
+            "{player1} eats some leftovers"
+        ]
+    },
+    "passive-death": {
+        "Default": [
+            "{player} is eaten by a pack of wolves",
+            "{player} is unable to survive the cold",
+            "{player}'s shelter collapses in their sleep",
+            "{player} dies of a snake bite",
+            "{player} is caught in a forest fire and burns",
+            "{player} is fatally struck by lightning",
+            "{player} kills themselves",
+            "{player} tries to escape, but dies trying",
+            "{player} eats a poisonous berry and dies",
+            "A tree falls on {player} and kills them"
+        ]
+    },
+    "attack-success": {
+        "Default": [
+            "{player} stabs {target} with a sharp stick",
+            "{target} is choked to death by {player}",
+            "{target} is shoved off a cliff by {player}",
+            "{target} is eaten by {player}",
+            "{player} buries {target} alive",
+            "{player} blows {target} up",
+            "{target} is set on fire by {player} and burns to death",
+            "{player} pushes {target} into a volcano",
+            "{target} is fatally injured in a fist fight with {player}",
+            "{player} gets into a knife fight with {target} and wins"
+        ]
+    },
+    "attack-fail": {
+        "Default": [
+            "{player} missed {target}",
+            "{player} tries pushing {target} off a cliff, but {target} dodges",
+            "{player}'s gun jams while attacking {target}",
+            "{player} defeats {target} but spares their life"
+        ]
+    },
+    "passive-attack": {
+        "Default": [
+            "{player} thinks about attacking someone, but decides against it",
+            "{player} fights the urge to attack someone",
+            "{player} chooses peace over war for now",
+            "A sudden aggression from {player} subsides",
+            "{player} doesn't want to fight"
+        ]
+    },
+    "winner": {
+        "Default": [
+            "{player} won the game with {amount} kill(s)!",
+            "{player} wins with {amount} kill(s)!"
+        ]
+    },
+    "most-kills": {
+        "Default": [
+            "{player} had the most kills: {amount}",
+            "{player} got {amount} kills (most kills of the game)"
+        ]
+    }
+}
