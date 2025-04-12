@@ -23,6 +23,7 @@
         "new-turn": "green",
         "end-turn": "yellow",
         "winner": "green",
-        "most-kills": "green"
+        "most-kills": "green",
+        "team-dead": "red"
     }
 }

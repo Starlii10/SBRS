@@ -35,6 +35,7 @@ def load_config(configpath: str) -> tuple:
     try:
         with open(configpath, encoding="utf-8") as f:
             config = json.load(f)
+
             # Check if teams mode is enabled
             if "use-teams" not in config:
                 print(
@@ -43,12 +44,7 @@ def load_config(configpath: str) -> tuple:
                 use_teams = False
             else:
                 use_teams = config["use-teams"]
-            # TODO: Implement teams fix
-            # For now disable teams mode
-            if use_teams:
-                raise NotImplementedError(
-                    "Teams mode is not working yet. Please disable teams mode in the config file."
-                )
+
             # Load players, playertypes, and teams
             if "files" in config:
                 try:
@@ -68,6 +64,7 @@ def load_config(configpath: str) -> tuple:
                             raise FileNotFoundError(
                                 f"Players file ({config['files']['players']}) does not exist."
                             )
+
                     # playertypes
                     if "playertypes" in config["files"]:
                         if os.path.exists(config["files"]["playertypes"]):
@@ -315,7 +312,9 @@ def initialize_logger(nosave=False, configpath=None):
 
 def verification_checks(players, messages):
     """Checks to ensure the configuration is valid."""
+
     # ---- Player verification checks
+
     # Check to ensure more than one player
     if len(players) < 2:
         raise ValueError(
@@ -329,6 +328,7 @@ def verification_checks(players, messages):
         )
 
     # ---- Message verification checks
+
     # Check to make sure messages isn't empty
     if len(messages) == 0:
         raise ValueError(
@@ -348,11 +348,10 @@ def verification_checks(players, messages):
             raise ValueError(
                 f'Message type "{message_type}" not found in messages file.'
             )
-        else:
-            if len(messages[message_type]["Default"]) == 0:
-                raise ValueError(
-                    f'Message type "{message_type}" in messages file does not have any messages for the Default type. Please add at least one message.'
-                )
+        if len(messages[message_type]["Default"]) == 0:
+            raise ValueError(
+                f'Message type "{message_type}" in messages file does not have any messages for the Default type. Please add at least one message.'
+            )
 
 
 def load_everything(configpath=None, nosave=False) -> tuple:
@@ -376,8 +375,6 @@ def load_everything(configpath=None, nosave=False) -> tuple:
     config, players, playertypes, teams, messages = load_config(configpath)
     players, teams = load_players(players, playertypes, teams, config["use-teams"])
     sbrs_game_logger = initialize_logger(nosave, configpath)
-    # Message loading is handled in load_config
-    # messages = load_messages(config["messages"])
     verification_checks(players, messages)
 
     return config, players, playertypes, teams, messages, sbrs_game_logger
