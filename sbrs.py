@@ -118,13 +118,23 @@ class SBRSGame:
     """
 
     def __init__(self, config):
-        self.addons = []
-        self.actions = []
-        self.config = config
-        self.remaining_players = config.players
-        self.sudden_death = False
-        self.something_happened = False
-        self.turn = 0
+        """
+            NOTE: This function is also responsible for loading addons.
+        """
+        self.addons: list = []
+        """A list of loaded addons."""
+        self.actions: list = []
+        """A list of actions that can be chosen from."""
+        self.config: SBRSConfig = config
+        """The game configuration."""
+        self.remaining_players: list = config.players
+        """A list of remaining players in the game."""
+        self.sudden_death: bool = False
+        """Whether sudden death is enabled."""
+        self.something_happened: bool = False
+        """Whether a game print happened this turn."""
+        self.turn: int = 0
+        """The current turn number."""
 
         # Load basic_game_behavior
         try:
@@ -141,13 +151,23 @@ class SBRSGame:
                     print(f"{Fore.YELLOW}Loading addon: {Fore.CYAN}{filename}")
                     try:
                         addon = importlib.import_module(f"addons.{filename[:-3]}")
-                        if hasattr(addon, "initgame"):
-                            addon.initgame(self)
                         if not hasattr(addon, "Addon"):
                             raise ValueError(
                                 "Addon does not have an Addon class. Was it renamed?"
                             )
                         self.addons.append(addon.Addon())
+                        try:
+                            self.addons[-1].initgame(self)
+                        except Exception as e:  # pylint: disable=broad-except
+                            if not hasattr(addon, "initgame"):
+                                pass # Ah, okay then
+                            print(
+                                f"{Fore.RED}Unable to initialize addon {filename}.\n"
+                                + "".join(
+                                    traceback.format_exception(type(e), e, e.__traceback__)
+                                )
+                            )
+                            self.addons.remove(addon)
                     except Exception as e:  # pylint: disable=broad-except
                         print(
                             f"{Fore.RED}Unable to load addon {filename}.\n"
@@ -171,6 +191,22 @@ class SBRSGame:
         if action.name in [a.name for a in self.actions]:
             raise ValueError(f"SBRSAction with name {action.name} already exists.")
         self.actions.append(action)
+
+    def remove_action(self, action):
+        """
+        Removes an SBRSAction from the game.
+
+        Args:
+            action (SBRSAction or str): The action to remove.
+
+        Raises:
+            ValueError: If the action is not in the game.
+        """
+        if isinstance(action, str):
+            action = next((a for a in self.actions if a.name == action), None)
+        if action is None:
+            raise ValueError(f"SBRSAction with name {action.name} does not exist.")
+        self.actions.remove(action)
 
     def game_print(self, msg: str):
         """
@@ -288,6 +324,12 @@ class SBRSGame:
                     # Random action
                     action = random.choice(self.actions)
                     action.function(self, player)
+                    # Remove dead players and check for game over
+                    self.remaining_players = [
+                        p for p in self.remaining_players if p.alive
+                    ]
+                    if len(self.remaining_players) == 1:
+                        self.game_over()
             if not self.something_happened:
                 if self.config.show_kills_only:
                     self.game_print(

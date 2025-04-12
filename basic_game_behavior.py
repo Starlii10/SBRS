@@ -64,11 +64,6 @@ class Addon(SBRSAddon):
                 )
                 target.kill()
                 player.kills += 1
-                game.remaining_players = [
-                    p for p in game.remaining_players if p.alive
-                ]
-                if len(game.remaining_players) == 1:
-                    game.game_over()
             elif not game.config.show_kills_only:
                 game.game_print(
                     f"{game.message_color('attack-fail')}{game.random_message('attack-fail', player.type)
@@ -154,6 +149,3 @@ class Addon(SBRSAddon):
                 f"{game.message_color('passive-death')}{game.random_message('passive-death', player.type).replace('{player}', game.message_color('generic-player') + player.name + game.message_color('passive-death'))}"
             )
             player.kill()
-            game.remaining_players = [p for p in game.remaining_players if p.alive]
-            if len(game.remaining_players) == 1:
-                game.game_over()
