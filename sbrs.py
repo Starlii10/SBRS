@@ -135,6 +135,8 @@ class SBRSGame:
         """Whether a game print happened this turn."""
         self.turn: int = 0
         """The current turn number."""
+        self.finished: bool = False
+        """Whether the game is finished."""
 
         # Load basic_game_behavior
         try:
@@ -268,17 +270,32 @@ class SBRSGame:
         for addon in self.addons:
             if hasattr(addon, "game_over"):
                 addon.game_over(self)
-        self.game_print(
-            self.random_message("winner", self.remaining_players[0].type)
-            .replace(
-                "{player}",
-                f"{self.message_color('generic-player')}{self.remaining_players[0].name}{self.message_color('winner')}",
+        if not self.config.use_teams:
+            self.game_print(
+                self.random_message("winner", self.remaining_players[0].type)
+                .replace(
+                    "{player}",
+                    f"{self.message_color('generic-player')}{self.remaining_players[0].name}{self.message_color('winner')}",
+                )
+                .replace(
+                    "{amount}",
+                    f"{self.message_color('generic-player')}{str(self.remaining_players[0].kills)}{self.message_color('winner')}",
+                )
             )
-            .replace(
-                "{amount}",
-                f"{self.message_color('generic-player')}{str(self.remaining_players[0].kills)}{self.message_color('winner')}",
-            )
-        )
+        else:
+            for team in set(p.team for p in self.remaining_players):
+                team_players = [p for p in self.remaining_players if p.team == team]
+                self.game_print(
+                    self.random_message("winner", team_players[0].type)
+                    .replace(
+                        "{player}",
+                        f"{self.message_color('generic-player')}{team} ({', '.join(p.name for p in team_players)}){self.message_color('winner')}",
+                    )
+                    .replace(
+                        "{amount}",
+                        f"{self.message_color('generic-player')}{str(sum(p.kills for p in team_players))}{self.message_color('winner')}",
+                    )
+                )
         most_kills = 0
         most_kills_players = []
         for player in self.config.players:
@@ -304,6 +321,7 @@ class SBRSGame:
                 f"{self.message_color('generic-player')}{str(most_kills)}{self.message_color('most-kills')}"
             )}"
         )
+        self.finished = True
 
     def simulate_turn(self):
         """
@@ -318,7 +336,7 @@ class SBRSGame:
                 if hasattr(addon, "begin_turn"):
                     addon.begin_turn(self)
             for player in self.config.players:
-                if len(self.remaining_players) == 1:
+                if self.finished:
                     break
                 if player.alive:
                     # Random action
@@ -328,8 +346,18 @@ class SBRSGame:
                     self.remaining_players = [
                         p for p in self.remaining_players if p.alive
                     ]
-                    if len(self.remaining_players) == 1:
-                        self.game_over()
+                    for team in set(p.team for p in self.remaining_players):
+                        team_players = [p for p in self.remaining_players if p.team == team]
+                        if len(team_players) == 0:
+                            self.game_print(
+                                f"{self.message_color('team-dead')}Team {team} has been eliminated.\n"
+                            )
+                    if self.config.use_teams:
+                        if len(set(p.team for p in self.remaining_players)) == 1:
+                            self.game_over()
+                    else:
+                        if len(self.remaining_players) == 1:
+                            self.game_over()
             if not self.something_happened:
                 if self.config.show_kills_only:
                     self.game_print(
@@ -347,17 +375,16 @@ class SBRSGame:
             print("Exiting...\n")
             sys.exit(0)
 
-    # Main loop
     def run_game(self):
         """
         The main game loop.
         Runs `simulate_turn()` until there is only one player left, then exits.
         """
 
-        if len(self.remaining_players) == 1:
+        if self.finished:
             print("Game already finished.")
 
-        while len(self.remaining_players) > 1:
+        while not self.finished:
             self.turn += 1
             self.simulate_turn()
             if __name__ == "__main__":
@@ -365,7 +392,7 @@ class SBRSGame:
                     if not args.auto:
                         input(
                             "Press enter to simulate next turn"
-                            if len(self.remaining_players) > 1
+                            if not self.finished
                             else "Press enter to exit"
                         )
                 except KeyboardInterrupt:
@@ -376,7 +403,7 @@ class SBRSGame:
                     sys.exit(0)
                 except EOFError:
                     pass
-            if not len(self.remaining_players) > 1:
+            if self.finished:
                 break
             print("------\n")
 
