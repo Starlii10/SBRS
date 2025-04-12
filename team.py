@@ -10,11 +10,21 @@
 class SBRSTeam:
     """
         Represents a team of players in SBRS.
+
+        Attributes:
+            name (str): The name of the team.
+            players (list): A list of players in the team.
+            addon_data (dict): A dictionary of data that addons can use.
     """
+    
     # Boring python class stuff
     def __init__(self, name):
         self.name = name
+        """The name of the team."""
         self.players = []
+        """A list of players in the team."""
+        self.addon_data = {}
+        """A dictionary of data that addons can use."""
 
     def __str__(self):
         return self.name
