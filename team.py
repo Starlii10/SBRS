@@ -16,7 +16,7 @@ class SBRSTeam:
             players (list): A list of players in the team.
             addon_data (dict): A dictionary of data that addons can use.
     """
-    
+
     # Boring python class stuff
     def __init__(self, name):
         self.name = name

@@ -17,6 +17,7 @@ from version import __version__
 from player import SBRSPlayer
 from team import SBRSTeam
 
+
 def load_config(configpath: str) -> tuple:
     """
     Loads the config file.

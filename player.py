@@ -16,8 +16,10 @@ class SBRSPlayer:
     
     Attributes:
         name (str): The name of the player.
-        team (SBRSTeam): The team the player is on. If None, the player is not on a team (default for FFA).
-        type (str): The player's type. Determines what type of messages to use. (default is "Default").
+        team (SBRSTeam): The team the player is on.
+                         If None, the player is not on a team (default for FFA).
+        type (str): The player's type. 
+                    Determines what type of messages to use. (default is "Default").
         alive (bool): Whether or not the player is alive. If dead, the player's turn is skipped..
         kills (int): The number of kills the player has.
         addon_data (dict): A dictionary of data that addons can use.
