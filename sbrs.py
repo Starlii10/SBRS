@@ -416,18 +416,6 @@ class SBRSAddon:
 
     # pylint: disable=unnecessary-pass
 
-    def __init__(self):
-        """
-        Early initialization. Called immediately after the addon is loaded,
-        before an `SBRSGame` is initialized.
-
-        Can be used to print information about the addon (version, author, etc.)
-
-        Note that not all addons are expected to be loaded at this point.
-        Accessing additional addons should be done in `initgame()`.
-        """
-        pass
-
     def initgame(self, game: SBRSGame):
         """
         Called when an `SBRSGame` is initialized.
