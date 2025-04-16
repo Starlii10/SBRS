@@ -18,4 +18,5 @@ dependencies = [
 repository = "https://github.com/Starlii10/sbrs"
 
 [tool.pytest.ini_options]
+pythonpath = ["."]
 testpaths = ["tests"]
