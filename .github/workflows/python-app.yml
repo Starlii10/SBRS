@@ -28,7 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         cd $GITHUB_WORKSPACE
-        # We know this exists in the root.
+        echo $GITHUB_WORKSPACE # for debugging
         pip install -r requirements.txt
     - name: Lint with flake8
       run: |
