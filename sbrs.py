@@ -17,10 +17,12 @@ import os
 import random
 import sys
 import traceback
+from typing import Union
 
 import colorama
 from colorama import Back, Fore, Style
 
+from action import SBRSAction
 from version import __version__
 from load_functions import load_everything
 from sbrs_config import SBRSConfig
@@ -115,6 +117,7 @@ class SBRSGame:
         turn (int): The current turn number.
         sudden_death (bool): If True, sudden death is enabled.
         something_happened (bool): If True, a game print happened this turn.
+        finished (bool): If True, the game is finished and should exit.
     """
 
     def __init__(self, config):
@@ -138,7 +141,10 @@ class SBRSGame:
         self.finished: bool = False
         """Whether the game is finished."""
 
-        # Load basic_game_behavior
+        # Load basic_game_behavior.
+        # This needs to be handled separately because it should ALWAYS be loaded
+        # as it implements the vanilla SBRS behavior. Without it, no actions would
+        # be available, and the game would be useless if not crash instantly.
         try:
             self.addons.append(importlib.import_module("basic_game_behavior").Addon())
             self.addons[-1].initgame(self)
@@ -146,6 +152,7 @@ class SBRSGame:
             raise Exception(  # pylint: disable=broad-exception-raised
                 f"{Fore.RED}Couldn't load SBRS base game behavior."
             ) from e
+
         # Load addons
         for _, _, files in os.walk("addons"):
             for filename in files:
@@ -153,6 +160,7 @@ class SBRSGame:
                     print(f"{Fore.YELLOW}Loading addon: {Fore.CYAN}{filename}")
                     try:
                         addon = importlib.import_module(f"addons.{filename[:-3]}")
+                        # Check for addon.Addon to initialize from
                         if not hasattr(addon, "Addon"):
                             raise ValueError(
                                 "Addon does not have an Addon class. Was it renamed?"
@@ -162,7 +170,7 @@ class SBRSGame:
                             self.addons[-1].initgame(self)
                         except Exception as e:  # pylint: disable=broad-except
                             if not hasattr(addon, "initgame"):
-                                pass # Ah, okay then
+                                pass  # initgame() is optional if actions are not added
                             print(
                                 f"{Fore.RED}Unable to initialize addon {filename}.\n"
                                 + "".join(
@@ -178,7 +186,7 @@ class SBRSGame:
                             )
                         )
 
-    def add_action(self, action):
+    def add_action(self, action: SBRSAction):
         """
         Adds an SBRSAction to the game.
 
@@ -194,12 +202,12 @@ class SBRSGame:
             raise ValueError(f"SBRSAction with name {action.name} already exists.")
         self.actions.append(action)
 
-    def remove_action(self, action):
+    def remove_action(self, action: Union[SBRSAction, str]):
         """
         Removes an SBRSAction from the game.
 
         Args:
-            action (SBRSAction or str): The action to remove.
+            action (SBRSAction | str): The action (or name of the action) to remove.
 
         Raises:
             ValueError: If the action is not in the game.
@@ -264,63 +272,11 @@ class SBRSGame:
 
     def game_over(self):
         """
-        Prints the game over messages (`winner` and `most-kills`).
-        Also runs game_over on addons.
+        Runs the game over logic on all addons.
         """
         for addon in self.addons:
             if hasattr(addon, "game_over"):
                 addon.game_over(self)
-        if not self.config.use_teams:
-            self.game_print(
-                self.random_message("winner", self.remaining_players[0].type)
-                .replace(
-                    "{player}",
-                    f"{self.message_color('generic-player')}{self.remaining_players[0].name}{self.message_color('winner')}",
-                )
-                .replace(
-                    "{amount}",
-                    f"{self.message_color('generic-player')}{str(self.remaining_players[0].kills)}{self.message_color('winner')}",
-                )
-            )
-        else:
-            for team in set(p.team for p in self.remaining_players):
-                team_players = [p for p in self.remaining_players if p.team == team]
-                self.game_print(
-                    self.random_message("winner", team_players[0].type)
-                    .replace(
-                        "{player}",
-                        f"{self.message_color('generic-player')}{team} ({', '.join(p.name for p in team_players)}){self.message_color('winner')}",
-                    )
-                    .replace(
-                        "{amount}",
-                        f"{self.message_color('generic-player')}{str(sum(p.kills for p in team_players))}{self.message_color('winner')}",
-                    )
-                )
-        most_kills = 0
-        most_kills_players = []
-        for player in self.config.players:
-            if player.kills > most_kills:
-                most_kills = player.kills
-                most_kills_players = [player]
-            elif player.kills == most_kills:
-                most_kills_players.append(player)
-        players_str = ""
-        if len(most_kills_players) == 1:
-            players_str = f"{self.message_color('generic-player')}{most_kills_players[0].name}{self.message_color('most-kills')}"
-        elif len(most_kills_players) == 2:
-            players_str = f"{self.message_color('generic-player')}{most_kills_players[0].name} {self.message_color('most-kills')}and {self.message_color('generic-player')}{most_kills_players[1].name}{self.message_color('most-kills')}"
-        else:
-            for player in most_kills_players[:-1]:
-                players_str += f"{self.message_color('generic-player')}{player.name}{self.message_color('most-kills')}, "
-            players_str += f"{self.message_color('most-kills')}and {self.message_color('generic-player')}{most_kills_players[-1].name}{self.message_color('most-kills')}"
-        self.game_print(
-            f"{self.message_color('most-kills')}{self.random_message('most-kills', random.choice(most_kills_players).type)
-            .replace('{player}', players_str)
-            .replace(
-                '{amount}',
-                f"{self.message_color('generic-player')}{str(most_kills)}{self.message_color('most-kills')}"
-            )}"
-        )
         self.finished = True
 
     def simulate_turn(self):

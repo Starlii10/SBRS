@@ -144,3 +144,62 @@ class Addon(SBRSAddon):
                 .replace('{player}', game.message_color('generic-player') + player.name + game.message_color('passive-death'))}"
             )
             player.kill()
+
+    def game_over(self, game: sbrs.SBRSGame):
+        """
+        Runs the game over logic on all addons.
+
+        Args:
+            game (sbrs.SBRSGame): The game being simulated.
+        """
+        if not game.config.use_teams:
+            game.game_print(
+                game.random_message("winner", game.remaining_players[0].type)
+                .replace(
+                    "{player}",
+                    f"{game.message_color('generic-player')}{game.remaining_players[0].name}{game.message_color('winner')}",
+                )
+                .replace(
+                    "{amount}",
+                    f"{game.message_color('generic-player')}{str(game.remaining_players[0].kills)}{game.message_color('winner')}",
+                )
+            )
+        else:
+            for team in set(p.team for p in game.remaining_players):
+                team_players = [p for p in game.remaining_players if p.team == team]
+                game.game_print(
+                    game.random_message("winner", team_players[0].type)
+                    .replace(
+                        "{player}",
+                        f"{game.message_color('generic-player')}{team} ({', '.join(p.name for p in team_players)}){game.message_color('winner')}",
+                    )
+                    .replace(
+                        "{amount}",
+                        f"{game.message_color('generic-player')}{str(sum(p.kills for p in team_players))}{game.message_color('winner')}",
+                    )
+                )
+        most_kills = 0
+        most_kills_players = []
+        for player in game.config.players:
+            if player.kills > most_kills:
+                most_kills = player.kills
+                most_kills_players = [player]
+            elif player.kills == most_kills:
+                most_kills_players.append(player)
+        players_str = ""
+        if len(most_kills_players) == 1:
+            players_str = f"{game.message_color('generic-player')}{most_kills_players[0].name}{game.message_color('most-kills')}"
+        elif len(most_kills_players) == 2:
+            players_str = f"{game.message_color('generic-player')}{most_kills_players[0].name} {game.message_color('most-kills')}and {game.message_color('generic-player')}{most_kills_players[1].name}{game.message_color('most-kills')}"
+        else:
+            for player in most_kills_players[:-1]:
+                players_str += f"{game.message_color('generic-player')}{player.name}{game.message_color('most-kills')}, "
+            players_str += f"{game.message_color('most-kills')}and {game.message_color('generic-player')}{most_kills_players[-1].name}{game.message_color('most-kills')}"
+        game.game_print(
+            f"{game.message_color('most-kills')}{game.random_message('most-kills', random.choice(most_kills_players).type)
+            .replace('{player}', players_str)
+            .replace(
+                '{amount}',
+                f"{game.message_color('generic-player')}{str(most_kills)}{game.message_color('most-kills')}"
+            )}"
+        )
