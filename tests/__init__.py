@@ -3,4 +3,3 @@
 
     Pytest hates me. Good, I hate it too.
 """
-

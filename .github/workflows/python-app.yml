@@ -36,6 +36,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
+        # Move to repo root.
+        cd $GITHUB_WORKSPACE
         # PYTHONPATH needs to be set so that pytest can find the modules.
         echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
         pytest
