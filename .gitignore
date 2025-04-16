@@ -2,3 +2,4 @@ __pycache__
 logs
 util_*
 .pytest_cache
+.venv
