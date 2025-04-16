@@ -1,5 +1,5 @@
 [project]
-name = "SBRS"
+name = "sbrs"
 description = "Starlii's Battle Royale Simulator (Python rewrite)"
 readme = "README.md"
 license = { file = "LICENSE" }
