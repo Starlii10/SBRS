@@ -26,6 +26,8 @@ class SBRSAction:
         self.description = description
         if function is None:
             raise ValueError("SBRSAction must have a function.")
+        if not callable(function):
+            raise ValueError("SBRSAction function must be a callable function.")
         self.function = function
 
     def __str__(self):

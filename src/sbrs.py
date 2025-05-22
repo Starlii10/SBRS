@@ -22,15 +22,22 @@ from typing import Union
 import colorama
 from colorama import Back, Fore, Style
 
-from action import SBRSAction
-from version import __version__
-from load_functions import load_everything
-from sbrs_config import SBRSConfig
+# Use relative imports if installed as a package
+try:
+    from .action import SBRSAction
+    from .version import __version__
+    from .load_functions import load_everything
+    from .sbrs_config import SBRSConfig
+except ImportError:
+    from action import SBRSAction
+    from version import __version__
+    from load_functions import load_everything
+    from sbrs_config import SBRSConfig
 
 # Python version check
-if sys.version_info[0] < 3:
+if sys.version_info[0] < 3 or sys.version_info[1] < 10:
     raise Exception(  # pylint: disable=broad-exception-raised
-        "Python 3 or above is required to run SBRS."
+        "Python 3.10 or above is required to run SBRS."
     )
 
 colorama.init(autoreset=True)
@@ -154,7 +161,7 @@ class SBRSGame:
             ) from e
 
         # Load addons
-        for _, _, files in os.walk("addons"):
+        for _, _, files in os.walk(f"{os.path.dirname(__file__)}/addons"):
             for filename in files:
                 if filename.endswith(".py"):
                     print(f"{Fore.YELLOW}Loading addon: {Fore.CYAN}{filename}")
@@ -163,21 +170,9 @@ class SBRSGame:
                         # Check for addon.Addon to initialize from
                         if not hasattr(addon, "Addon"):
                             raise ValueError(
-                                "Addon does not have an Addon class. Was it renamed?"
+                                'Addon does not have an "Addon" class. Was it renamed (the class MUST be named "Addon")?'
                             )
                         self.addons.append(addon.Addon())
-                        try:
-                            self.addons[-1].initgame(self)
-                        except Exception as e:  # pylint: disable=broad-except
-                            if not hasattr(addon, "initgame"):
-                                pass  # initgame() is optional if actions are not added
-                            print(
-                                f"{Fore.RED}Unable to initialize addon {filename}.\n"
-                                + "".join(
-                                    traceback.format_exception(type(e), e, e.__traceback__)
-                                )
-                            )
-                            self.addons.remove(addon)
                     except Exception as e:  # pylint: disable=broad-except
                         print(
                             f"{Fore.RED}Unable to load addon {filename}.\n"
@@ -185,6 +180,20 @@ class SBRSGame:
                                 traceback.format_exception(type(e), e, e.__traceback__)
                             )
                         )
+
+        # Run initgame on addons
+        for addon in self.addons:
+            if addon == self.addons[-1]:
+                # Skip the base game behavior addon. This was
+                # initialized earlier.
+                continue
+            if not hasattr(addon, "initgame"):
+                continue
+            if not callable(addon.initgame):
+                print(
+                    f"{Fore.YELLOW}Addon \"{addon.__class__.__name__}\"'s \"initgame\" method is not callable! Skipping..."
+                )
+            addon.initgame(self)
 
     def add_action(self, action: SBRSAction):
         """
@@ -199,7 +208,7 @@ class SBRSGame:
         if action is None or action.function is None:
             raise ValueError("SBRSAction must have a function.")
         if action.name in [a.name for a in self.actions]:
-            raise ValueError(f"SBRSAction with name {action.name} already exists.")
+            raise ValueError(f"An SBRSAction with the name \"{action.name}\" already exists.")
         self.actions.append(action)
 
     def remove_action(self, action: Union[SBRSAction, str]):
@@ -235,6 +244,7 @@ class SBRSGame:
             msg = msg.replace(Back.BLUE, "")
             msg = msg.replace(Back.WHITE, "")
             msg = msg.replace(Style.RESET_ALL, "")
+            msg = msg.replace("\x1b[35m", "")
             msg = msg.replace("\x1b[36m", "")
             self.config.sbrs_game_logger.info(msg)
         self.something_happened = True
@@ -249,7 +259,7 @@ class SBRSGame:
 
     def random_message(self, message_type: str, player_type: str):
         """
-        Returns a random message from the loaded messagesfor the
+        Returns a random message from the loaded messages for the
         specified message type and player type.
 
         Args:
@@ -298,16 +308,18 @@ class SBRSGame:
                     # Random action
                     action = random.choice(self.actions)
                     action.function(self, player)
-                    # Remove dead players and check for game over
+                    # Remove dead players
                     self.remaining_players = [
                         p for p in self.remaining_players if p.alive
                     ]
+                    # Remove dead players from teams
                     for team in set(p.team for p in self.remaining_players):
                         team_players = [p for p in self.remaining_players if p.team == team]
                         if len(team_players) == 0:
                             self.game_print(
                                 f"{self.message_color('team-dead')}Team {team} has been eliminated.\n"
                             )
+                    # Check for game over
                     if self.config.use_teams:
                         if len(set(p.team for p in self.remaining_players)) == 1:
                             self.game_over()
@@ -371,6 +383,23 @@ class SBRSAddon:
     """
 
     # pylint: disable=unnecessary-pass
+
+    def __init__(self):
+        """
+        This should not be used. Use `early_init()` instead
+        """
+        self.early_init()
+
+    def early_init(self):
+        """
+        Called when the addon is first loaded
+        Can be used to add things to the game, or change configuration.
+
+        Note that the only addon that is guaranteed to be loaded is the
+        base_game_behavior addon. If you need to access additional addons,
+        do it in `initgame()` instead.
+        """
+        pass
 
     def initgame(self, game: SBRSGame):
         """

@@ -1,0 +1,4 @@
+# Pylint configuration for SBRS
+
+[MESSAGES CONTROL]
+disable = line-too-long

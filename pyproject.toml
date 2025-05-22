@@ -1,9 +1,10 @@
+# Project information
 [project]
 name = "sbrs"
 description = "Starlii's Battle Royale Simulator (Python rewrite)"
 readme = "README.md"
 license = { file = "LICENSE" }
-version = "0.1b1"
+dynamic = ["version"]
 authors = [
     { name = "Starlii10", email = "starliithestarbot@gmail.com" }
 ]
@@ -17,6 +18,18 @@ dependencies = [
 [project.urls]
 repository = "https://github.com/Starlii10/sbrs"
 
+# Setuptools configuration
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+version = { attr = "version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# Pytest configuration
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]

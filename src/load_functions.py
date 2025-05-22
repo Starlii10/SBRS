@@ -13,10 +13,14 @@ import traceback
 
 from colorama import Fore, Style
 
-from version import __version__
-from player import SBRSPlayer
-from team import SBRSTeam
-
+try:
+    from .version import __version__
+    from .player import SBRSPlayer
+    from .team import SBRSTeam
+except ImportError:
+    from version import __version__
+    from player import SBRSPlayer
+    from team import SBRSTeam
 
 def load_config(configpath: str) -> tuple:
     """
@@ -46,6 +50,8 @@ def load_config(configpath: str) -> tuple:
                 use_teams = config["use-teams"]
 
             # Load players, playertypes, and teams
+            # NOTE: The files could be in the same folder as the config file
+            # so check there too
             if "files" in config:
                 try:
                     # players
@@ -55,15 +61,28 @@ def load_config(configpath: str) -> tuple:
                                 config["files"]["players"], encoding="utf-8"
                             ) as f:
                                 cfg_players = f.readlines()
-                                cfg_players = [
-                                    player.strip()
-                                    for player in cfg_players
-                                    if player.strip() != ""
-                                ]
+                        elif os.path.exists(
+                            os.path.join(
+                                os.path.dirname(configpath), config["files"]["players"]
+                            )
+                        ):
+                            with open(
+                                os.path.join(
+                                    os.path.dirname(configpath),
+                                    config["files"]["players"],
+                                ),
+                                encoding="utf-8",
+                            ) as f:
+                                cfg_players = f.readlines()
                         else:
                             raise FileNotFoundError(
                                 f"Players file ({config['files']['players']}) does not exist."
                             )
+                        cfg_players = [
+                            player.strip()
+                            for player in cfg_players
+                            if player.strip() != ""
+                        ]
 
                     # playertypes
                     if "playertypes" in config["files"]:
@@ -72,21 +91,36 @@ def load_config(configpath: str) -> tuple:
                                 config["files"]["playertypes"], encoding="utf-8"
                             ) as f:
                                 cfg_playertypes = f.readlines()
-                                cfg_playertypes = [
-                                    playertype.strip()
-                                    for playertype in cfg_playertypes
-                                    if playertype.strip() != ""
-                                ]
-                                # replace empty playertypes with default
-                                cfg_playertypes = [
-                                    "Default" if playertype == "" else playertype
-                                    for playertype in cfg_playertypes
-                                ]
+                        elif os.path.exists(
+                            os.path.join(
+                                os.path.dirname(configpath),
+                                config["files"]["playertypes"],
+                            )
+                        ):
+                            with open(
+                                os.path.join(
+                                    os.path.dirname(configpath),
+                                    config["files"]["playertypes"],
+                                ),
+                                encoding="utf-8",
+                            ) as f:
+                                cfg_playertypes = f.readlines()
+
                         else:
                             print(
                                 f"{Fore.YELLOW}Playertypes file ({config['files']['playertypes']}) does not exist. Defaulting to Default for all players."
                             )
                             cfg_playertypes = ["Default"] * len(cfg_players)
+                        cfg_playertypes = [
+                            playertype.strip()
+                            for playertype in cfg_playertypes
+                            if playertype.strip() != ""
+                        ]
+                        # replace empty playertypes with default
+                        cfg_playertypes = [
+                            "Default" if playertype == "" else playertype
+                            for playertype in cfg_playertypes
+                        ]
                     else:
                         print(
                             f"{Fore.YELLOW}Playertypes not specified in config file. Defaulting to Default for all players."
@@ -184,15 +218,30 @@ def load_config(configpath: str) -> tuple:
             # Load extra message files
             if "extra-message-files" in config:
                 for messagefile in config["extra-message-files"]:
+                    # Find the path to the file
+                    if not os.path.exists(messagefile):
+                        messagefile = os.path.join(
+                            os.path.dirname(configpath), messagefile
+                        )
                     messages = {**messages, **load_messages(messagefile)}
             # Load default messages
             if (
                 "load-default-messages" in config
                 and not config["load-default-messages"] is False
             ):
-                load_messages("messages.json")
+                if os.path.exists("messages.json"):
+                    load_messages("messages.json")
+                elif os.path.exists(f"{os.path.dirname(configpath)}/messages.json"):
+                    load_messages(f"{os.path.dirname(configpath)}/messages.json")
+                elif os.path.exists(f"{os.path.dirname(__file__)}/messages.json"):
+                    load_messages(f"{os.path.dirname(__file__)}/messages.json")
             elif not "load-default-messages" in config:
-                messages = {**messages, **load_messages("messages.json")}
+                if os.path.exists("messages.json"):
+                    messages = {**messages, **load_messages("messages.json")}
+                elif os.path.exists(f"{os.path.dirname(configpath)}/messages.json"):
+                    messages = {**messages, **load_messages(f"{os.path.dirname(configpath)}/messages.json")}
+                elif os.path.exists(f"{os.path.dirname(__file__)}/messages.json"):
+                    messages = {**messages, **load_messages(f"{os.path.dirname(__file__)}/messages.json")}
             # Additional settings go here...
             print(
                 f'{Fore.GREEN}Loaded config file "{configpath}" successfully.{Style.RESET_ALL}'
@@ -223,6 +272,7 @@ def load_messages(messagefile=None) -> dict:
                 print(
                     f"{Fore.YELLOW}Provided messages file ({messagefile}) does not exist. Skipping."
                 )
+                return {}
         print(f'{Fore.GREEN}Message file "{messagefile}" loaded successfully.')
     except Exception as e:
         print(

@@ -26,7 +26,7 @@ class SBRSPlayer:
     """
 
     # Boring python class stuff
-    def __init__(self, name: str, team: SBRSTeam = None, playertype: str = "Default"):
+    def __init__(self, name: str, team: SBRSTeam | None = None, playertype: str = "Default"):
         self.name = name
         """The name of the player."""
         self.team = team

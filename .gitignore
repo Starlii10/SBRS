@@ -3,3 +3,5 @@ logs
 util_*
 .pytest_cache
 .venv
+dist
+*.egg-info

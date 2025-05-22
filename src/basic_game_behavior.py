@@ -11,7 +11,6 @@ from action import SBRSAction
 from player import SBRSPlayer
 from sbrs import SBRSAddon
 
-
 class Addon(SBRSAddon):
     """
     The base game behavior for SBRS in the form of an SBRSAddon.
@@ -147,7 +146,7 @@ class Addon(SBRSAddon):
 
     def game_over(self, game: sbrs.SBRSGame):
         """
-        Runs the game over logic on all addons.
+        Runs when the game ends.
 
         Args:
             game (sbrs.SBRSGame): The game being simulated.

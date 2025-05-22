@@ -35,7 +35,7 @@ class SBRSConfig:
     playertypes: list
     teams: list
     messages: dict
-    sbrs_game_logger: logging.Logger
+    sbrs_game_logger: logging.Logger | None
     message_colors: dict
     classic_behavior: bool
     sudden_death: bool
