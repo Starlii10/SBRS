@@ -4,7 +4,7 @@ The Python remake of the Hunger Games Simulator-like engine made by a silly goob
 This has absolutely nothing to do with battle royale video games. No idea where you got that idea from.
 
 > [!WARNING]
-> This is a very early version of SBRS.
+> SBRS is no longer being maintained.
 
 ## Getting Started
 
